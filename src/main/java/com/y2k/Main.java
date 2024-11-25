@@ -29,7 +29,6 @@ public class Main {
     public void createAndShowGUI() {
         JFrame frame = new JFrame("Clasificador WEKA");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 800);
         frame.setLayout(new BorderLayout());
 
         JLabel title = new JLabel("Clasificador WEKA", SwingConstants.CENTER);
@@ -69,14 +68,22 @@ public class Main {
 
         classifyButton.addActionListener((ActionEvent e) -> {
             try {
-                // Crear una nueva instancia basada en los campos de entrada
                 double[] values = new double[dataset.numAttributes()];
                 for (int i = 0; i < inputFields.length; i++) {
                     String userInput = inputFields[i].getText();
-                    if (dataset.attribute(i).isNumeric()) {
-                        values[i] = Double.parseDouble(userInput);
+
+                    if (userInput.isEmpty()) {
+                        if (dataset.attribute(i).isNumeric()) {
+                            values[i] = dataset.meanOrMode(i);
+                        } else {
+                            values[i] = dataset.meanOrMode(i);
+                        }
                     } else {
-                        values[i] = dataset.attribute(i).indexOfValue(userInput);
+                        if (dataset.attribute(i).isNumeric()) {
+                            values[i] = Double.parseDouble(userInput);
+                        } else {
+                            values[i] = dataset.attribute(i).indexOfValue(userInput);
+                        }
                     }
                 }
                 values[dataset.classIndex()] = Double.NaN;
@@ -84,7 +91,6 @@ public class Main {
                 DenseInstance newInstance = new DenseInstance(1.0, values);
                 newInstance.setDataset(dataset);
 
-                // Clasificar la nueva instancia
                 double predictedClass = tree.classifyInstance(newInstance);
                 String className = dataset.classAttribute().value((int) predictedClass);
 
@@ -100,6 +106,10 @@ public class Main {
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.getContentPane().setBackground(new Color(245, 245, 245));
+
+        frame.pack();
+
+        frame.setLocationRelativeTo(null);
 
         frame.setVisible(true);
     }
